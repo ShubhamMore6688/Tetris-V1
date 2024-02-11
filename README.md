@@ -1,70 +1,36 @@
-# React Tetris V1
+# DevSecOps Project-Deploying a Tetris game on EKS cluster
 
-Tetris game built with React
 
 <h1 align="center">
   <img alt="React tetris " title="#React tetris desktop" src="./images/game.jpg" />
 </h1>
 
 
-Use Sonarqube block 
-```
-environment {
-        SCANNER_HOME=tool 'sonar-scanner'
-      }
+DevSecOps Project-Deploying a Tetris game on EKS cluster 
 
-stage("Sonarqube Analysis "){
-            steps{
-                withSonarQubeEnv('sonar-server') {
-                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Amazon \
-                    -Dsonar.projectKey=Amazon '''
-                }
-            }
-        }
-```        
+## Phase 1: Initial Setup and Deployment
 
-Owasp block
-```
-stage('OWASP FS SCAN') {
-            steps {
-                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
-                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-            }
-        }
-```
+In this phase, an EC2 instance was provisioned on AWS with Ubuntu 22.04, and the Tetris game was deployed. The process included cloning the core repository, installing Docker, and running the application within a container.
 
-# ARGO CD SETUP
-https://archive.eksworkshop.com/intermediate/290_argocd/install/
+## Phase 2: Security
 
-# Image updater stage
-```
- environment {
-    GIT_REPO_NAME = "Tetris-manifest"
-    GIT_USER_NAME = "Aj7Ay"
-  }
-    stage('Checkout Code') {
-      steps {
-        git branch: 'main', url: 'https://github.com/Aj7Ay/Tetris-manifest.git'
-      }
-    }
+Security measures were implemented by installing SonarQube, Trivy, and OWASP Dependency Check on the EC2 instance for continuous code quality and security checks. The integration of these tools into the CI/CD pipeline ensured robust security practices.
 
-    stage('Update Deployment File') {
-      steps {
-        script {
-          withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
-            // Determine the image name dynamically based on your versioning strategy
-            NEW_IMAGE_NAME = "sevenajay/tetris77:latest"
+## Phase 3: CI/CD Setup with Jenkins
 
-            // Replace the image name in the deployment.yaml file
-            sh "sed -i 's|image: .*|image: $NEW_IMAGE_NAME|' deployment.yml"
+Jenkins was installed on the EC2 instance to automate the deployment process. The pipeline was configured to build and deploy the Tetris game. Plugins for SonarQube, Node.js, and email notifications were added. The pipeline also incorporated OWASP Dependency Check and Trivy scans for enhanced security checks. The final Docker image was then deployed to Docker Hub.
 
-            // Git commands to stage, commit, and push the changes
-            sh 'git add deployment.yml'
-            sh "git commit -m 'Update deployment image to $NEW_IMAGE_NAME'"
-            sh "git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main"
-          }
-        }
-      }
-    }
+## Phase 4: Monitoring
 
-```
+Monitoring capabilities were established using Prometheus and Grafana on a separate server for monitoring. Prometheus was set up to collect comprehensive data, and Grafana provided visualizations for monitoring system performance. Node Exporter was utilized for monitoring the EKS cluster, ensuring dynamic issue identification and resolution.
+
+## Phase 5: Notification
+
+This phase involved the implementation of notification services using Email for pipeline status in Jenkins.
+
+## Phase 6: EKS Integration using Terraform
+
+The final phase focused on the integration of AWS Elastic Kubernetes Service (EKS) for efficient Kubernetes cluster management. Node Exporter was deployed to facilitate the monitoring of the Kubernetes cluster. The Tetris game was successfully deployed on the Kubernetes cluster using ArgoCD, ensuring scalable and containerized application deployment.
+     
+
+
